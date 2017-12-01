@@ -1,0 +1,2 @@
+# BottomNavigationViewPager
+Xamarin Android BottomNavigationView with ViewPager
