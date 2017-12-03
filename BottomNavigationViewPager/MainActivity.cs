@@ -2,16 +2,19 @@
 using Android.Support.Design.Widget;
 using Android.Support.Design.Internal;
 using Android.Support.V4.View;
-using Android.App;
 using BottomNavigationViewPager.Adapters;
+using System.Collections.Generic;
+using Android.Support.V4.App;
+using BottomNavigationViewPager.Fragments;
 
 namespace BottomNavigationViewPager
 {
-    [Activity(Label = "Bottom Tabs", Theme = "@style/AppTheme", MainLauncher = true)]
-    public class MainActivity : Android.Support.V4.App.FragmentActivity
+    [Android.App.Activity(Label = "Bottom Tabs", Theme = "@style/AppTheme", MainLauncher = true)]
+    public class MainActivity : FragmentActivity
     {
         ViewPager _viewPager;
         BottomNavigationView _navigationView;
+        Fragment[] _fragments;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -20,39 +23,30 @@ namespace BottomNavigationViewPager
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
+            InitializeTabs();
+
             _viewPager = FindViewById<ViewPager>(Resource.Id.viewpager);
             _viewPager.PageSelected += ViewPager_PageSelected;
-            _viewPager.Adapter = new ViewPagerAdapter(SupportFragmentManager, 4);
+            _viewPager.Adapter = new ViewPagerAdapter(SupportFragmentManager, _fragments);
 			
             _navigationView = FindViewById<BottomNavigationView>(Resource.Id.bottom_navigation);
             RemoveShiftMode(_navigationView);
             _navigationView.NavigationItemSelected += NavigationView_NavigationItemSelected;
         }
 
+        void InitializeTabs() {
+            _fragments = new Fragment[] {
+                TheFragment.NewInstance("Genres", "tab_genres"),
+                TheFragment.NewInstance("Titles", "tab_titles"),
+                TheFragment.NewInstance("Stream", "tab_stream"),
+                TheFragment.NewInstance("Showtimes", "tab_showtimes")
+            };
+        }
+
         private void ViewPager_PageSelected(object sender, ViewPager.PageSelectedEventArgs e)
         {
-            int resId;
-
-            switch (e.Position)
-            {
-                case 0:
-                    resId = Resource.Id.menu_genres;
-                    break;
-                case 1:
-                    resId = Resource.Id.menu_titles;
-					break;
-				case 2:
-					resId = Resource.Id.menu_stream;
-					break;
-				case 3:
-					resId = Resource.Id.menu_showtimes;
-					break;
-                default:
-                    resId = 0;
-                    break;
-            }
-
-            _navigationView.SelectedItemId = resId;
+            var item = _navigationView.Menu.GetItem(e.Position);
+            _navigationView.SelectedItemId = item.ItemId;
         }
 
         void NavigationView_NavigationItemSelected(object sender, BottomNavigationView.NavigationItemSelectedEventArgs e)
